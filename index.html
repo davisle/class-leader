@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Leaders of the Day</title>
+<meta name="description" content="Pick fair, random leaders of the day for your classes.">
+<meta name="theme-color" content="#0C49D2">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Leaders">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --bg-soft:#EEF1F8;
+    --bg-soft-solid:#EEEEEE;
+    --blue:#0C49D2;
+    --blue-dark:#002396;
+    --blue-soft:rgba(12,73,210,0.08);
+    --blue-soft-2:rgba(12,73,210,0.14);
+    --line:rgba(12,73,210,0.18);
+    --ink:#171A21;
+    --muted:#5C6270;
+    --card-bg:#FFFFFF;
+    --card-shadow: 0 10px 24px rgba(12,73,210,0.10), 0 2px 6px rgba(16,24,40,0.06);
+    --orange:#FA530F;
+    --orange-soft:rgba(250,83,15,0.14);
+    --tiger-black:#0A0A0A;
+    --danger:#C0392B;
+    --danger-soft:rgba(192,57,43,0.08);
+    --gold:#0A0A0A;
+    --gold-soft:rgba(10,10,10,0.06);
+    --sidebar-bg:#E4ECFB;
+    --name-card-bg:#FFEFD6;
+    --radius: 18px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Karla', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle, rgba(12,73,210,0.07) 1.4px, transparent 1.4px) 0 0/16px 16px,
+      var(--bg);
+    min-height:100vh;
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Anton', 'Karla', sans-serif; font-weight:400; letter-spacing:0.5px; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  button{ font-family:inherit; }
+  #app{
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    position:relative; z-index:1;
+    background:var(--bg);
+    border:8px solid var(--blue);
+    box-shadow:inset 0 0 0 3px #FFFFFF, inset 0 0 0 5px var(--blue);
+  }
+  /* HEADER */
+  header.top{
+    padding:calc(16px + var(--safe-top)) 24px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+    border-bottom:4px solid var(--gold);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand h1{ font-size:22px; margin:0; color:#FFFFFF; letter-spacing:1px; text-shadow:0 2px 0 rgba(0,0,0,0.25); }
+  .brand .sub{ font-size:11px; color:rgba(255,255,255,0.9); margin-top:2px; font-weight:700; letter-spacing:0.3px; }
+
+  /* LAYOUT */
+  .layout{ display:flex; flex:1; align-items:stretch; }
+  .sidebar{
+    width:212px; flex-shrink:0;
+    background:var(--sidebar-bg);
+    border-right:3px solid var(--gold);
+    padding:20px 12px;
+    display:flex; flex-direction:column;
+  }
+  .sidebar-logo{
+    display:flex; align-items:center; justify-content:center;
+    padding-bottom:18px;
+  }
+  .sidebar-logo img{
+    width:84px; height:84px; object-fit:contain; display:block;
+  }
+  .tagline-ribbon{
+    background:var(--blue); color:#FFFFFF; font-family:'Anton',sans-serif;
+    font-size:11px; letter-spacing:0.5px; text-align:center;
+    padding:8px 6px; border-radius:6px; margin-bottom:16px;
+    text-transform:uppercase;
+  }
+  .sidebar-nav{ display:flex; flex-direction:column; gap:4px; }
+  .sidebar-nav button{
+    display:flex; align-items:center; gap:12px; text-align:left;
+    background:none; border:none; border-radius:10px; padding:11px 14px;
+    color:var(--muted); font-size:14px; font-weight:600; cursor:pointer;
+    transition:background .15s ease, color .15s ease; font-family:'Karla',sans-serif;
+    width:100%;
+  }
+  .sidebar-nav button:hover{ background:rgba(12,73,210,0.10); color:var(--blue-dark); }
+  .sidebar-nav button.active{ background:var(--blue); color:#FFFFFF; }
+  .sidebar-nav button .ic{ font-size:18px; flex-shrink:0; }
+  .sidebar-nav button .label{ white-space:nowrap; }
+
+  .sidebar-quote{
+    margin-top:auto; padding-top:18px; border-top:2px solid var(--gold);
+    text-align:center;
+  }
+  .sidebar-quote .q-mark{
+    font-family:'Anton',sans-serif; font-size:26px; color:var(--gold); line-height:1; margin-bottom:2px;
+  }
+  .sidebar-quote .q-text{
+    font-size:12px; font-style:italic; color:var(--ink); line-height:1.5; margin-bottom:6px; padding:0 2px;
+  }
+  .sidebar-quote .q-author{
+    font-size:11px; color:var(--muted); font-weight:700;
+  }
+
+  @media (max-width:680px){
+    .sidebar{ width:64px; padding:16px 8px; }
+    .sidebar-logo img{ width:36px; height:36px; }
+    .sidebar-nav button{ justify-content:center; padding:12px 0; }
+    .sidebar-nav button .label{ display:none; }
+    .sidebar-quote{ display:none; }
+    .tagline-ribbon{ display:none; }
+  }
+
+  main{ flex:1; max-width:1100px; width:100%; margin:0 auto; padding:28px 28px calc(48px + var(--safe-bottom)); }
+  .hidden{ display:none !important; }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--muted);
+  }
+  .empty-state .big-icon{ font-size:40px; margin-bottom:10px; }
+  .empty-state h2{ color:var(--ink); font-size:19px; margin:0 0 6px; }
+  .empty-state p{ font-size:14px; line-height:1.5; margin:0 0 18px; }
+
+  /* PICK VIEW */
+  .pick-topbar{
+    display:flex; align-items:center; gap:12px; margin-bottom:20px;
+  }
+  .pick-topbar label{
+    font-size:13px; font-weight:700; color:var(--muted); flex-shrink:0;
+  }
+  .pick-topbar select{
+    max-width:360px;
+  }
+
+  @media (max-width:760px){
+    .pick-panel{ padding:22px 18px 26px; }
+    .status-row{ flex-direction:column; align-items:flex-start; gap:3px; }
+    .draw-btn{ width:150px; height:150px; }
+    .cards-row{ gap:16px; }
+    .name-card{ flex:1 1 100%; max-width:340px; min-width:0; min-height:220px; padding:28px 20px 22px; }
+    .name-card .name{ font-size:32px; }
+    .pick-topbar select{ max-width:none; flex:1; }
+  }
+
+  .pick-panel{
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--card-shadow);
+    padding:34px 30px 38px;
+    margin-top:0;
+    text-align:center;
+    width:100%;
+  }
+  .pick-panel .status-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:18px; text-align:left;
+  }
+  .pick-panel .status-row .cname{ font-size:16px; font-weight:600; color:var(--ink); }
+  .pick-panel .status-row .avail{ font-size:12px; color:var(--blue); font-weight:600; }
+  .progress-track{
+    height:6px; border-radius:4px; background:var(--bg-soft-solid); overflow:hidden; margin-bottom:20px;
+  }
+  .progress-fill{ height:100%; background:linear-gradient(90deg, var(--blue), #4E86F5); border-radius:4px; transition:width .3s ease; }
+
+  .draw-zone{ min-height:220px; display:flex; align-items:center; justify-content:center; position:relative; }
+  .draw-btn{
+    width:170px; height:170px; border-radius:50%;
+    border:2px dashed var(--blue);
+    background:var(--blue-soft);
+    color:var(--blue-dark); font-family:'Anton',sans-serif; font-weight:700; font-size:16px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer; transition:transform .15s ease, background .15s ease;
+  }
+  .draw-btn:active{ transform:scale(0.96); background:var(--blue-soft-2); }
+  .draw-btn .emoji{ font-size:30px; }
+  .draw-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .cards-row{ display:flex; justify-content:center; gap:32px; flex-wrap:wrap; }
+  .name-card{
+    flex:1 1 0; max-width:480px; min-width:260px;
+    min-height:320px; background:var(--blue); color:#FFFFFF;
+    border-radius:20px; padding:48px 32px 40px; box-shadow:var(--card-shadow);
+    border-top:9px solid var(--orange);
+    position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    animation:dealIn .45s cubic-bezier(.2,.8,.3,1.1) both;
+  }
+  .name-card:nth-child(1){ transform:rotate(-2deg); animation-delay:0s; }
+  .name-card:nth-child(2){ transform:rotate(1.5deg); animation-delay:.12s; }
+  @keyframes dealIn{
+    from{ opacity:0; transform:translateY(30px) rotate(0deg) scale(.85); }
+  }
+  .name-card .pin{
+    width:20px; height:20px; border-radius:50%;
+    background:var(--orange); position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+    box-shadow:0 2px 5px rgba(0,0,0,0.25);
+  }
+  .name-card .label{ font-size:16px; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.75); }
+  .name-card .name{ font-family:'Anton',sans-serif; font-size:64px; font-weight:600; text-align:center; line-height:1.15; word-break:break-word; color:#FFFFFF; }
+  .name-card .swap-btn{
+    margin-top:16px; background:none; border:none; color:#FFD9CF; font-size:14px; font-weight:700;
+    text-decoration:underline; cursor:pointer; padding:2px 4px; font-family:'Karla',sans-serif;
+  }
+
+  .reset-badge{
+    margin-top:14px; font-size:12px; color:var(--blue-dark); background:var(--blue-soft);
+    border:1px solid var(--line); border-radius:8px; padding:8px 12px; text-align:left;
+  }
+
+  .action-row{ display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+  .btn{
+    border:none; border-radius:10px; padding:11px 18px; font-size:14px; font-weight:600;
+    cursor:pointer; font-family:'Karla',sans-serif; transition:transform .1s ease, opacity .15s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background:var(--blue); color:#FFFFFF; }
+  .btn-secondary{ background:transparent; color:var(--blue); border:1px solid var(--line); }
+  .btn-ghost{ background:transparent; color:var(--muted); text-decoration:underline; padding:8px 4px; }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(192,57,43,0.35); }
+  .btn-block{ width:100%; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .today-confirmed{
+    text-align:left; margin-top:4px;
+  }
+  .today-confirmed h3{ font-size:14px; color:var(--muted); margin:0 0 12px; font-weight:600; }
+
+  .notes-input{
+    margin-top:14px; width:100%; background:var(--bg-soft); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px; color:var(--ink); font-size:13px; font-family:'Karla',sans-serif;
+  }
+  .notes-input::placeholder{ color:var(--muted); }
+
+  section.block{ margin-top:26px; }
+  section.block h2{ font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin:0 0 12px; font-weight:700; }
+
+  /* CLASSES VIEW */
+  .class-card{
+    background:var(--card-bg); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-bottom:10px; box-shadow:var(--card-shadow);
+  }
+  .class-card .row1{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .class-card .row1 .name{ font-weight:700; font-size:15px; color:var(--ink); }
+  .class-card .row1 .meta{ font-size:12px; color:var(--blue); font-weight:600; white-space:nowrap; }
+  .class-card .progress-track{ margin:10px 0 0; margin-bottom:0; }
+  .class-card .actions{ display:flex; gap:16px; margin-top:10px; }
+  .class-card .actions a{ font-size:12.5px; color:var(--blue); cursor:pointer; text-decoration:underline; font-weight:600; }
+  .class-card .manage{ margin-top:14px; border-top:1px solid var(--line); padding-top:14px; }
+  .roster-list{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .roster-pill{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:20px;
+    padding:5px 8px 5px 12px; font-size:12.5px; display:flex; align-items:center; gap:6px; color:var(--ink);
+  }
+  .roster-pill button{ background:none; border:none; color:var(--danger); cursor:pointer; font-size:13px; padding:0 2px; }
+  .roster-pill.used{ opacity:0.5; }
+  .inline-form{ display:flex; gap:8px; margin-top:8px; }
+  .inline-form input{ flex:1; }
+  input[type=text], textarea{
+    background:var(--bg); border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; color:var(--ink); font-size:14px; font-family:'Karla',sans-serif; width:100%;
+  }
+  input[type=text]::placeholder, textarea::placeholder{ color:var(--muted); }
+  textarea{ resize:vertical; min-height:90px; line-height:1.5; }
+  label.field-label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-weight:600; }
+  .field{ margin-bottom:14px; }
+
+  .add-class-card{
+    border:1px dashed var(--blue); border-radius:14px; padding:16px; margin-bottom:16px; background:var(--blue-soft);
+  }
+  .add-class-card summary{ cursor:pointer; font-weight:700; color:var(--blue-dark); list-style:none; display:flex; align-items:center; gap:8px; }
+  .add-class-card summary::-webkit-details-marker{ display:none; }
+  .add-class-card summary::before{ content:"+"; font-size:18px; }
+  .add-class-card[open] summary::before{ content:"–"; }
+  .add-class-card .body{ margin-top:14px; }
+  .tabsub{ display:flex; gap:6px; margin-bottom:14px; }
+  .tabsub button{
+    flex:1; padding:8px; border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--muted); font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .tabsub button.active{ background:var(--blue); color:#FFFFFF; border-color:var(--blue); }
+  .backup-textarea{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; min-height:130px; line-height:1.5;
+  }
+  .backup-textarea[readonly]{ background:var(--bg-soft); color:var(--muted); }
+
+  .quote-row{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--line);
+  }
+  .quote-row:last-child{ border-bottom:none; }
+  .quote-row .qbody{ flex:1; }
+  .quote-row .qtext{ font-size:13px; font-style:italic; color:var(--ink); line-height:1.45; }
+  .quote-row .qauthor{ font-size:11.5px; color:var(--muted); margin-top:3px; font-weight:600; }
+  .quote-row button{
+    background:none; border:none; color:var(--danger); cursor:pointer; font-size:14px;
+    flex-shrink:0; padding:2px 4px;
+  }
+
+  /* HISTORY VIEW */
+  .hist-filter{ margin-bottom:16px; }
+  select{
+    background:var(--bg); border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:9px 10px; font-size:13.5px; width:100%; font-family:'Karla',sans-serif;
+  }
+  .hist-day{ margin-bottom:18px; }
+  .hist-day .date-label{
+    font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;
+    margin-bottom:8px; font-weight:700;
+  }
+  .hist-entry{
+    background:var(--card-bg); color:var(--ink); border-radius:10px; padding:12px 14px; margin-bottom:8px;
+    border:1px solid var(--line); box-shadow:var(--card-shadow);
+  }
+  .hist-entry .row1{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .hist-entry .cls{ font-size:11px; color:var(--blue); text-transform:uppercase; letter-spacing:0.5px; font-weight:700; }
+  .hist-entry .names{ font-family:'Anton',sans-serif; font-weight:600; font-size:15px; margin-top:3px; }
+  .hist-entry .del{ background:none; border:none; color:var(--danger); cursor:pointer; font-size:15px; padding:2px 4px; flex-shrink:0; }
+  .hist-entry .note-field{
+    margin-top:8px; width:100%; border:none; border-top:1px dashed var(--line); background:transparent;
+    padding-top:6px; font-size:12.5px; color:var(--muted); font-family:'Karla',sans-serif;
+  }
+  .hist-entry .note-field::placeholder{ color:var(--muted); opacity:0.7; }
+
+  /* HELP VIEW */
+  .help-card{
+    background:var(--card-bg); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; margin-bottom:12px; box-shadow:var(--card-shadow);
+  }
+  .help-card h3{ font-size:15.5px; margin:0 0 10px; color:var(--ink); }
+  .help-card p{ font-size:13.5px; line-height:1.55; color:var(--muted); margin:0 0 10px; }
+  .help-card p:last-child{ margin-bottom:0; }
+  .help-card strong{ color:var(--ink); }
+  .help-card ol{ margin:0 0 10px; padding-left:20px; font-size:13.5px; line-height:1.6; color:var(--muted); }
+  .help-card ol:last-child{ margin-bottom:0; }
+  .help-card ol li{ margin-bottom:6px; }
+  .help-card ol li::marker{ color:var(--blue); font-weight:700; }
+  .code-block{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; line-height:1.6;
+    color:var(--ink); white-space:pre-wrap; margin:0 0 10px; overflow-x:auto;
+  }
+
+  .toast{
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(10px); z-index:20;
+    background:var(--ink); color:#FFFFFF; padding:10px 16px; border-radius:8px; font-size:13px; font-weight:600;
+    box-shadow:0 10px 24px rgba(0,0,0,0.25); opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,20,40,0.5); z-index:30; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal{
+    background:#FFFFFF; border:1px solid var(--line); border-radius:14px; padding:20px; max-width:360px; width:100%;
+    box-shadow:0 20px 50px rgba(10,20,40,0.25);
+  }
+  .modal h3{ margin:0 0 10px; font-size:16px; color:var(--ink); }
+  .modal p{ font-size:13.5px; color:var(--muted); line-height:1.5; margin:0 0 18px; }
+  .modal .actions{ display:flex; gap:10px; justify-content:flex-end; }
+
+  @media (min-width:761px){
+    .draw-btn{ width:190px; height:190px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <div>
+        <h1>🐾 Leaders of the Day</h1>
+        <div class="sub" id="headerSub">Loading…</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <img src="./logo-tiger.png" alt="Carr Elementary Tigers logo">
+      </div>
+      <div class="tagline-ribbon">Lead Today, Inspire Tomorrow!</div>
+      <nav class="sidebar-nav">
+        <button data-view="pick" class="active"><span class="ic">🎯</span><span class="label">Pick</span></button>
+        <button data-view="classes"><span class="ic">🗂️</span><span class="label">Classes</span></button>
+        <button data-view="history"><span class="ic">📋</span><span class="label">History</span></button>
+        <button data-view="help"><span class="ic">❓</span><span class="label">Help</span></button>
+      </nav>
+      <div class="sidebar-quote" id="sidebarQuote"></div>
+    </div>
+
+    <main id="main">
+      <section id="view-pick"></section>
+      <section id="view-classes" class="hidden"></section>
+      <section id="view-history" class="hidden"></section>
+      <section id="view-help" class="hidden"></section>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "helperOfTheDay:v1";
+  var state = null;
+  var currentView = "pick";
+  var pendingDraw = null; // {classId, students:[...], resetHappened:bool}
+  var manageOpenId = null;
+
+  function uid(prefix){ return (prefix||'id') + '_' + Math.random().toString(36).slice(2,10); }
+  function todayISO(){ var d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function fmtDate(iso){
+    var parts = iso.split('-'); var d = new Date(parts[0], parts[1]-1, parts[2]);
+    return d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function defaultQuotes(){
+    return [
+      { id: uid('qt'), text: "Leadership is not about being in charge. It's about taking care of those in your charge.", author: "Simon Sinek" },
+      { id: uid('qt'), text: "A leader is one who knows the way, goes the way, and shows the way.", author: "John C. Maxwell" },
+      { id: uid('qt'), text: "Leadership is a choice, not a position.", author: "Stephen R. Covey" },
+      { id: uid('qt'), text: "The growth and development of people is the highest calling of leadership.", author: "Harvey S. Firestone" },
+      { id: uid('qt'), text: "You don't have to hold a position to be a leader.", author: "Henry Ford" }
+    ];
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(!Array.isArray(parsed.classes)) parsed.classes = [];
+        if(!Array.isArray(parsed.history)) parsed.history = [];
+        if(!Array.isArray(parsed.quotes)) parsed.quotes = defaultQuotes();
+        return parsed;
+      }
+    }catch(e){ console.warn('load failed', e); }
+    return { classes: [], history: [], currentClassId: null, quotes: defaultQuotes() };
+  }
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ showToast("Couldn't save — storage may be full."); }
+  }
+
+  function pickTodaysQuote(){
+    if(!state.quotes || state.quotes.length === 0) return null;
+    var d = todayISO();
+    var hash = 0;
+    for(var i=0;i<d.length;i++){ hash = (hash*31 + d.charCodeAt(i)) % 1000000007; }
+    var idx = Math.abs(hash) % state.quotes.length;
+    return state.quotes[idx];
+  }
+
+  function renderSidebarQuote(){
+    var el = document.getElementById('sidebarQuote');
+    if(!el) return;
+    var q = pickTodaysQuote();
+    if(!q){ el.innerHTML = ''; return; }
+    el.innerHTML =
+      '<div class="q-mark">&ldquo;</div>' +
+      '<div class="q-text">'+esc(q.text)+'</div>' +
+      '<div class="q-author">— '+esc(q.author)+'</div>';
+  }
+
+  function getClass(id){ return state.classes.find(function(c){ return c.id === id; }); }
+  function availableStudents(cls){
+    var usedSet = new Set(cls.usedIds);
+    return cls.students.filter(function(s){ return !usedSet.has(s.id); });
+  }
+
+  function drawTwo(cls){
+    var usedIds = cls.usedIds.slice();
+    var pool = cls.students.filter(function(s){ return usedIds.indexOf(s.id) === -1; });
+    var picks = [];
+    var resetHappened = false;
+
+    for(var i=0;i<2;i++){
+      if(cls.students.length === 0) break;
+      if(pool.length === 0){
+        // everyone has had a turn — start a new cycle, excluding whoever we already
+        // picked in this same draw so no one repeats within one draw.
+        resetHappened = true;
+        usedIds = [];
+        pool = cls.students.filter(function(s){
+          return !picks.some(function(p){ return p.id === s.id; });
+        });
+      }
+      if(pool.length === 0) break; // only possible if class has 1 student total
+      var idx = Math.floor(Math.random() * pool.length);
+      var chosen = pool[idx];
+      pool.splice(idx,1);
+      picks.push(chosen);
+    }
+    return { picks: picks, resetHappened: resetHappened };
+  }
+
+  function commitDraw(classId, picks, resetHappened){
+    var cls = getClass(classId);
+    if(!cls) return;
+    if(resetHappened){
+      cls.cycle = (cls.cycle||1) + 1;
+      cls.usedIds = [];
+    }
+    picks.forEach(function(p){
+      if(cls.usedIds.indexOf(p.id) === -1) cls.usedIds.push(p.id);
+    });
+    var entry = {
+      id: uid('hist'),
+      classId: cls.id,
+      className: cls.name,
+      date: todayISO(),
+      ts: Date.now(),
+      students: picks.map(function(p){ return { id:p.id, name:p.name }; }),
+      notes: ""
+    };
+    state.history.unshift(entry);
+    save();
+    return entry;
+  }
+
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  function showModal(opts){
+    var root = document.getElementById('modalRoot');
+    root.innerHTML =
+      '<div class="modal-overlay" id="modalOverlay">' +
+        '<div class="modal">' +
+          '<h3>'+esc(opts.title)+'</h3>' +
+          '<p>'+esc(opts.body)+'</p>' +
+          '<div class="actions">' +
+            '<button class="btn btn-secondary" id="modalCancel">Cancel</button>' +
+            '<button class="btn btn-primary" id="modalConfirm">'+esc(opts.confirmLabel||'Confirm')+'</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.getElementById('modalCancel').onclick = closeModal;
+    document.getElementById('modalOverlay').onclick = function(e){ if(e.target.id==='modalOverlay') closeModal(); };
+    document.getElementById('modalConfirm').onclick = function(){ closeModal(); opts.onConfirm && opts.onConfirm(); };
+  }
+  function closeModal(){ document.getElementById('modalRoot').innerHTML = ''; }
+
+  function updateHeaderSub(){
+    var sub = document.getElementById('headerSub');
+    var total = state.classes.length;
+    if(total === 0){ sub.textContent = 'Add your first class to get started'; return; }
+    sub.textContent = total + ' class' + (total===1?'':'es') + ' loaded';
+  }
+
+  /* ---------- RENDER: PICK VIEW ---------- */
+  function renderPick(){
+    var el = document.getElementById('view-pick');
+    if(state.classes.length === 0){
+      el.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="big-icon">🗂️</div>' +
+          '<h2>No classes yet</h2>' +
+          '<p>Add a class roster to start picking fair, random leaders of the day.</p>' +
+          '<button class="btn btn-primary" id="goAddClass">Add a Class</button>' +
+        '</div>';
+      document.getElementById('goAddClass').onclick = function(){ switchView('classes'); };
+      return;
+    }
+    var cls = getClass(state.currentClassId) || state.classes[0];
+    if(!cls){ el.innerHTML=''; return; }
+    if(state.currentClassId !== cls.id){ state.currentClassId = cls.id; save(); }
+
+    var avail = availableStudents(cls);
+    var total = cls.students.length;
+    var pct = total ? Math.round(((total-avail.length)/total)*100) : 0;
+
+    var todaysEntries = state.history.filter(function(h){ return h.classId === cls.id && h.date === todayISO(); });
+
+    var topbarHtml = '<div class="pick-topbar"><label for="pickClassSelect">Class</label>' +
+      '<select id="pickClassSelect">' + state.classes.map(function(c){
+        var a = availableStudents(c).length;
+        var selected = c.id === cls.id ? ' selected' : '';
+        return '<option value="'+c.id+'"'+selected+'>'+esc(c.name)+' ('+a+'/'+c.students.length+' available)</option>';
+      }).join('') + '</select></div>';
+
+    var html = '<div class="pick-panel">';
+    html += '<div class="status-row"><div class="cname">'+esc(cls.name)+'</div>' +
+            '<div class="avail mono">'+avail.length+' of '+total+' left this round</div></div>';
+    html += '<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+
+    if(total === 0){
+      html += '<div class="empty-state" style="padding:20px 0;"><p>This class has no students yet. Add some in the Classes tab.</p></div>';
+    } else if(pendingDraw && pendingDraw.classId === cls.id){
+      html += '<div class="cards-row">' + pendingDraw.picks.map(function(p, idx){
+        return '<div class="name-card"><div class="pin"></div><div class="label">Leader</div><div class="name">'+esc(p.name)+'</div>' +
+          '<button class="swap-btn" data-slot="'+idx+'">↻ Out today? Swap</button></div>';
+      }).join('') + '</div>';
+      if(pendingDraw.resetHappened){
+        html += '<div class="reset-badge">✨ Everyone in this class has now had a turn — the round has reset.</div>';
+      }
+      html += '<div class="action-row">' +
+        '<button class="btn btn-secondary" id="btnRedraw">Redraw</button>' +
+        '<button class="btn btn-primary" id="btnConfirm">Confirm Leaders</button>' +
+        '</div>';
+    } else if(todaysEntries.length > 0){
+      html += '<div class="today-confirmed"><h3>Today\'s Leader'+(todaysEntries[0].students.length>1?'s':'')+'</h3>';
+      todaysEntries.forEach(function(entry){
+        html += '<div class="cards-row" style="margin-bottom:10px;">' + entry.students.map(function(p){
+          return '<div class="name-card"><div class="pin"></div><div class="label">Leader</div><div class="name">'+esc(p.name)+'</div></div>';
+        }).join('') + '</div>';
+      });
+      html += '<div class="action-row"><button class="btn btn-ghost" id="btnRedoToday">Draw again for today</button></div>';
+      html += '</div>';
+    } else {
+      html += '<div class="draw-zone">' +
+        '<button class="draw-btn" id="btnDraw" '+(avail.length===0 && total<2?'disabled':'')+'>' +
+          '<span class="emoji">🎲</span>Draw Two Leaders</button>' +
+        '</div>';
+      if(total < 2){
+        html += '<p style="font-size:12.5px;color:var(--muted);">Add at least 2 students to this class to draw leaders.</p>';
+      }
+    }
+    html += '</div>';
+    el.innerHTML = topbarHtml + html;
+
+    var classSelect = document.getElementById('pickClassSelect');
+    if(classSelect) classSelect.onchange = function(){
+      state.currentClassId = classSelect.value;
+      pendingDraw = null;
+      save();
+      renderAll();
+    };
+
+    var btnDraw = document.getElementById('btnDraw');
+    if(btnDraw) btnDraw.onclick = function(){ doDraw(cls); };
+    var btnRedraw = document.getElementById('btnRedraw');
+    if(btnRedraw) btnRedraw.onclick = function(){ doDraw(cls); };
+    var btnConfirm = document.getElementById('btnConfirm');
+    if(btnConfirm) btnConfirm.onclick = function(){
+      var pd = pendingDraw;
+      pendingDraw = null;
+      commitDraw(pd.classId, pd.picks, pd.resetHappened);
+      showToast('Leaders confirmed for today 🎉');
+      renderAll();
+    };
+    var btnRedoToday = document.getElementById('btnRedoToday');
+    if(btnRedoToday) btnRedoToday.onclick = function(){ doDraw(cls); };
+
+    Array.prototype.forEach.call(el.querySelectorAll('.swap-btn'), function(btn){
+      btn.onclick = function(){ redrawSlot(cls, parseInt(btn.getAttribute('data-slot'), 10)); };
+    });
+  }
+
+  function doDraw(cls){
+    var result = drawTwo(cls);
+    if(result.picks.length === 0){
+      showToast('Not enough students to draw from.');
+      return;
+    }
+    pendingDraw = { classId: cls.id, picks: result.picks, resetHappened: result.resetHappened };
+    renderPick();
+  }
+
+  function redrawSlot(cls, slotIndex){
+    if(!pendingDraw || pendingDraw.classId !== cls.id) return;
+    var otherIndex = slotIndex === 0 ? 1 : 0;
+    var other = pendingDraw.picks[otherIndex];
+    var current = pendingDraw.picks[slotIndex];
+    var excludeIds = [other.id, current.id];
+
+    var pool = cls.students.filter(function(s){
+      return cls.usedIds.indexOf(s.id) === -1 && excludeIds.indexOf(s.id) === -1;
+    });
+    var resetHappened = pendingDraw.resetHappened;
+
+    if(pool.length === 0){
+      // no one else left in this round to swap in — start a fresh round for the swap
+      resetHappened = true;
+      pool = cls.students.filter(function(s){ return excludeIds.indexOf(s.id) === -1; });
+    }
+    if(pool.length === 0){
+      showToast('No other student available to swap in.');
+      return;
+    }
+    var idx = Math.floor(Math.random() * pool.length);
+    pendingDraw.picks[slotIndex] = pool[idx];
+    pendingDraw.resetHappened = resetHappened;
+    renderPick();
+  }
+
+  /* ---------- RENDER: CLASSES VIEW ---------- */
+  function parseBulkImport(text){
+    var blocks = text.split(/\n\s*\n/).map(function(b){ return b.trim(); }).filter(Boolean);
+    var out = [];
+    blocks.forEach(function(block){
+      var lines = block.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+      if(lines.length < 1) return;
+      var name = lines[0].replace(/^class:\s*/i,'').trim();
+      var students = lines.slice(1);
+      if(students.length === 0) return;
+      out.push({ name: name, students: students });
+    });
+    return out;
+  }
+
+  function renderClasses(){
+    var el = document.getElementById('view-classes');
+    var html = '';
+
+    html += '<details class="add-class-card" id="addClassDetails"><summary>Add a class</summary><div class="body">';
+    html += '<div class="tabsub"><button id="tabSingle" class="active">One class</button><button id="tabBulk">Bulk import (many classes)</button></div>';
+    html += '<div id="singleForm">';
+    html += '<div class="field"><label class="field-label">Class name</label><input type="text" id="newClassName" placeholder="e.g. Room 12 — 3rd Grade"></div>';
+    html += '<div class="field"><label class="field-label">Students (one name per line)</label><textarea id="newClassStudents" placeholder="Ava Smith\nBen Jones\nCara Lee\n…"></textarea></div>';
+    html += '<button class="btn btn-primary btn-block" id="btnAddSingle">Add Class</button>';
+    html += '</div>';
+    html += '<div id="bulkForm" class="hidden">';
+    html += '<div class="field"><label class="field-label">Paste all classes — class name on its own line, then its students, with a blank line between classes</label>' +
+            '<textarea id="bulkText" style="min-height:160px;" placeholder="Room 12\nAva Smith\nBen Jones\n\nRoom 14\nCara Lee\nDan Patel"></textarea></div>';
+    html += '<button class="btn btn-primary btn-block" id="btnAddBulk">Import Classes</button>';
+    html += '</div>';
+    html += '</div></details>';
+
+    html += '<details class="add-class-card" id="backupDetails"><summary>Backup &amp; restore data</summary><div class="body">';
+    html += '<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.5;">Move data between devices — e.g. export from the Chromebook, then import on the iPhone (or the other way around).</p>';
+    html += '<div class="tabsub"><button id="tabExport" class="active">Export</button><button id="tabImport">Import</button></div>';
+    html += '<div id="exportForm">';
+    html += '<div class="field"><label class="field-label">All classes &amp; history as a backup file</label>' +
+            '<textarea id="exportText" class="backup-textarea" readonly>'+esc(JSON.stringify(state))+'</textarea></div>';
+    html += '<div class="action-row" style="margin-top:0;">' +
+      '<button class="btn btn-secondary" id="btnCopyExport">Copy to Clipboard</button>' +
+      '<button class="btn btn-primary" id="btnDownloadExport">Download Backup File</button>' +
+      '</div>';
+    html += '</div>';
+    html += '<div id="importForm" class="hidden">';
+    html += '<div class="field"><label class="field-label">Choose a backup file</label><input type="file" accept="application/json,.json" id="importFile"></div>';
+    html += '<div class="field"><label class="field-label">…or paste backup text here</label><textarea id="importText" class="backup-textarea" placeholder="Paste the exported backup text here"></textarea></div>';
+    html += '<button class="btn btn-primary btn-block" id="btnImportData">Import Data</button>';
+    html += '<p style="font-size:12px;color:var(--muted);margin:8px 0 0;">Importing replaces all classes and history currently on this device.</p>';
+    html += '</div>';
+    html += '</div></details>';
+
+    html += '<details class="add-class-card" id="quotesDetails"><summary>Manage leadership quotes</summary><div class="body">';
+    html += '<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.5;">One of these rotates at the bottom of the sidebar each day.</p>';
+    if(state.quotes.length === 0){
+      html += '<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;">No quotes yet — add one below.</p>';
+    } else {
+      html += '<div class="quote-list">' + state.quotes.map(function(q){
+        return '<div class="quote-row"><div class="qbody"><div class="qtext">"'+esc(q.text)+'"</div>' +
+          '<div class="qauthor">— '+esc(q.author||'Unknown')+'</div></div>' +
+          '<button data-act="removeQuote" data-id="'+q.id+'">✕</button></div>';
+      }).join('') + '</div>';
+    }
+    html += '<div class="field" style="margin-top:14px;"><label class="field-label">Quote</label>' +
+            '<textarea id="newQuoteText" placeholder="e.g. Leadership is a choice, not a position."></textarea></div>';
+    html += '<div class="field"><label class="field-label">Author</label>' +
+            '<input type="text" id="newQuoteAuthor" placeholder="e.g. Stephen R. Covey"></div>';
+    html += '<button class="btn btn-primary btn-block" id="btnAddQuote">Add Quote</button>';
+    html += '</div></details>';
+
+    if(state.classes.length === 0){
+      html += '<div class="empty-state"><p>No classes yet — add one above to get started.</p></div>';
+    } else {
+      html += state.classes.map(function(c){
+        var avail = availableStudents(c);
+        var open = manageOpenId === c.id;
+        var card = '<div class="class-card">';
+        card += '<div class="row1"><div class="name">'+esc(c.name)+'</div><div class="meta mono">'+avail.length+'/'+c.students.length+' available</div></div>';
+        card += '<div class="progress-track" style="margin-top:10px;"><div class="progress-fill" style="width:'+(c.students.length?Math.round(((c.students.length-avail.length)/c.students.length)*100):0)+'%"></div></div>';
+        card += '<div class="actions">' +
+          '<a data-act="manage" data-id="'+c.id+'">'+(open?'Hide roster':'Manage roster')+'</a>' +
+          '<a data-act="reset" data-id="'+c.id+'">Reset round</a>' +
+          '<a data-act="delete" data-id="'+c.id+'" style="color:#e0827a;">Delete</a>' +
+          '</div>';
+        if(open){
+          card += '<div class="manage">';
+          card += '<div class="field"><label class="field-label">Rename class</label><input type="text" data-id="'+c.id+'" class="renameInput" value="'+esc(c.name)+'"></div>';
+          card += '<label class="field-label">Roster ('+c.students.length+' students — dimmed have already gone this round)</label>';
+          card += '<div class="roster-list">' + c.students.map(function(s){
+            var used = c.usedIds.indexOf(s.id) !== -1;
+            return '<div class="roster-pill'+(used?' used':'')+'">'+esc(s.name)+' <button data-act="removeStudent" data-class="'+c.id+'" data-student="'+s.id+'">✕</button></div>';
+          }).join('') + '</div>';
+          card += '<div class="inline-form"><input type="text" class="addStudentInput" data-class="'+c.id+'" placeholder="Add a student…">' +
+                  '<button class="btn btn-secondary" data-act="addStudent" data-id="'+c.id+'">Add</button></div>';
+          card += '</div>';
+        }
+        card += '</div>';
+        return card;
+      }).join('');
+    }
+
+    el.innerHTML = html;
+    wireClassesView();
+  }
+
+  function wireClassesView(){
+    var tabSingle = document.getElementById('tabSingle');
+    var tabBulk = document.getElementById('tabBulk');
+    if(tabSingle) tabSingle.onclick = function(){
+      tabSingle.classList.add('active'); tabBulk.classList.remove('active');
+      document.getElementById('singleForm').classList.remove('hidden');
+      document.getElementById('bulkForm').classList.add('hidden');
+    };
+    if(tabBulk) tabBulk.onclick = function(){
+      tabBulk.classList.add('active'); tabSingle.classList.remove('active');
+      document.getElementById('bulkForm').classList.remove('hidden');
+      document.getElementById('singleForm').classList.add('hidden');
+    };
+
+    var tabExport = document.getElementById('tabExport');
+    var tabImport = document.getElementById('tabImport');
+    if(tabExport) tabExport.onclick = function(){
+      tabExport.classList.add('active'); tabImport.classList.remove('active');
+      document.getElementById('exportForm').classList.remove('hidden');
+      document.getElementById('importForm').classList.add('hidden');
+    };
+    if(tabImport) tabImport.onclick = function(){
+      tabImport.classList.add('active'); tabExport.classList.remove('active');
+      document.getElementById('importForm').classList.remove('hidden');
+      document.getElementById('exportForm').classList.add('hidden');
+    };
+
+    var btnCopyExport = document.getElementById('btnCopyExport');
+    if(btnCopyExport) btnCopyExport.onclick = function(){
+      var text = document.getElementById('exportText').value;
+      var done = function(){ showToast('Copied to clipboard'); };
+      var fallback = function(){
+        var ta = document.getElementById('exportText');
+        ta.focus(); ta.select();
+        try{ document.execCommand('copy'); done(); }
+        catch(e){ showToast('Could not copy — select the text manually.'); }
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
+    };
+
+    var btnDownloadExport = document.getElementById('btnDownloadExport');
+    if(btnDownloadExport) btnDownloadExport.onclick = function(){
+      var text = document.getElementById('exportText').value;
+      var blob = new Blob([text], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'leaders-of-the-day-backup-' + todayISO() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      showToast('Backup file downloaded');
+    };
+
+    var importFile = document.getElementById('importFile');
+    if(importFile) importFile.onchange = function(){
+      var file = importFile.files && importFile.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(){
+        document.getElementById('importText').value = reader.result;
+      };
+      reader.onerror = function(){ showToast('Could not read that file.'); };
+      reader.readAsText(file);
+    };
+
+    var btnImportData = document.getElementById('btnImportData');
+    if(btnImportData) btnImportData.onclick = function(){
+      var raw = document.getElementById('importText').value.trim();
+      if(!raw){ showToast('Paste or choose a backup file first.'); return; }
+      var parsed;
+      try{ parsed = JSON.parse(raw); }
+      catch(e){ showToast("That doesn't look like a valid backup file."); return; }
+
+      if(!parsed || typeof parsed !== 'object' || (!Array.isArray(parsed.classes) && !Array.isArray(parsed.history))){
+        showToast("That doesn't look like a Leaders of the Day backup.");
+        return;
+      }
+
+      var normalized = {
+        classes: Array.isArray(parsed.classes) ? parsed.classes : [],
+        history: Array.isArray(parsed.history) ? parsed.history : [],
+        currentClassId: parsed.currentClassId || null
+      };
+      if(!normalized.classes.some(function(c){ return c.id === normalized.currentClassId; })){
+        normalized.currentClassId = normalized.classes.length ? normalized.classes[0].id : null;
+      }
+
+      showModal({
+        title: 'Replace data on this device?',
+        body: 'This will overwrite all classes and history currently on this device with the backup you\'re importing. This can\'t be undone.',
+        confirmLabel: 'Replace Data',
+        onConfirm: function(){
+          state = normalized;
+          save();
+          manageOpenId = null;
+          showToast('Data imported successfully');
+          renderAll();
+        }
+      });
+    };
+
+    var btnAddSingle = document.getElementById('btnAddSingle');
+    if(btnAddSingle) btnAddSingle.onclick = function(){
+      var name = document.getElementById('newClassName').value.trim();
+      var raw = document.getElementById('newClassStudents').value;
+      var students = raw.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+      if(!name){ showToast('Give the class a name first.'); return; }
+      var cls = { id: uid('cls'), name: name, students: students.map(function(n){ return { id: uid('stu'), name:n }; }), usedIds: [], cycle: 1 };
+      state.classes.push(cls);
+      if(!state.currentClassId) state.currentClassId = cls.id;
+      save();
+      showToast('Added ' + name);
+      document.getElementById('addClassDetails').removeAttribute('open');
+      renderAll();
+    };
+
+    var btnAddBulk = document.getElementById('btnAddBulk');
+    if(btnAddBulk) btnAddBulk.onclick = function(){
+      var raw = document.getElementById('bulkText').value;
+      var parsed = parseBulkImport(raw);
+      if(parsed.length === 0){ showToast('Could not find any classes in that text.'); return; }
+      parsed.forEach(function(p){
+        var cls = { id: uid('cls'), name: p.name, students: p.students.map(function(n){ return { id: uid('stu'), name:n }; }), usedIds: [], cycle: 1 };
+        state.classes.push(cls);
+      });
+      if(!state.currentClassId) state.currentClassId = state.classes[0].id;
+      save();
+      showToast('Imported ' + parsed.length + ' class' + (parsed.length===1?'':'es'));
+      document.getElementById('addClassDetails').removeAttribute('open');
+      renderAll();
+    };
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act="manage"]'), function(a){
+      a.onclick = function(){
+        var id = a.getAttribute('data-id');
+        manageOpenId = (manageOpenId === id) ? null : id;
+        renderClasses();
+      };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act="reset"]'), function(a){
+      a.onclick = function(){
+        var id = a.getAttribute('data-id');
+        var cls = getClass(id);
+        showModal({
+          title: 'Reset this round?',
+          body: 'Everyone in "'+cls.name+'" will become eligible to be picked again. Past history stays intact.',
+          confirmLabel: 'Reset',
+          onConfirm: function(){
+            cls.usedIds = [];
+            cls.cycle = (cls.cycle||1) + 1;
+            save();
+            showToast('Round reset for ' + cls.name);
+            renderAll();
+          }
+        });
+      };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act="delete"]'), function(a){
+      a.onclick = function(){
+        var id = a.getAttribute('data-id');
+        var cls = getClass(id);
+        showModal({
+          title: 'Delete this class?',
+          body: '"'+cls.name+'" and its history will be permanently removed. This can\'t be undone.',
+          confirmLabel: 'Delete',
+          onConfirm: function(){
+            state.classes = state.classes.filter(function(c){ return c.id !== id; });
+            state.history = state.history.filter(function(h){ return h.classId !== id; });
+            if(state.currentClassId === id) state.currentClassId = state.classes.length ? state.classes[0].id : null;
+            save();
+            showToast('Deleted ' + cls.name);
+            renderAll();
+          }
+        });
+      };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.renameInput'), function(inp){
+      inp.onblur = function(){
+        var id = inp.getAttribute('data-id');
+        var cls = getClass(id);
+        var val = inp.value.trim();
+        if(val && val !== cls.name){ cls.name = val; save(); updateHeaderSub(); }
+      };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act="removeStudent"]'), function(btn){
+      btn.onclick = function(){
+        var classId = btn.getAttribute('data-class');
+        var studentId = btn.getAttribute('data-student');
+        var cls = getClass(classId);
+        cls.students = cls.students.filter(function(s){ return s.id !== studentId; });
+        cls.usedIds = cls.usedIds.filter(function(id){ return id !== studentId; });
+        save();
+        renderAll();
+      };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act="addStudent"]'), function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-id');
+        var input = document.querySelector('.addStudentInput[data-class="'+id+'"]');
+        var name = input.value.trim();
+        if(!name) return;
+        var cls = getClass(id);
+        cls.students.push({ id: uid('stu'), name: name });
+        input.value = '';
+        save();
+        renderAll();
+      };
+    });
+
+    var btnAddQuote = document.getElementById('btnAddQuote');
+    if(btnAddQuote) btnAddQuote.onclick = function(){
+      var text = document.getElementById('newQuoteText').value.trim();
+      var author = document.getElementById('newQuoteAuthor').value.trim();
+      if(!text){ showToast('Enter a quote first.'); return; }
+      state.quotes.push({ id: uid('qt'), text: text, author: author || 'Unknown' });
+      save();
+      showToast('Quote added');
+      renderAll();
+    };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-act="removeQuote"]'), function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-id');
+        state.quotes = state.quotes.filter(function(q){ return q.id !== id; });
+        save();
+        showToast('Quote removed');
+        renderAll();
+      };
+    });
+  }
+
+  /* ---------- RENDER: HISTORY VIEW ---------- */
+  function renderHistory(){
+    var el = document.getElementById('view-history');
+    var filterId = el._filter || 'all';
+    var html = '<div class="hist-filter"><select id="histFilter">' +
+      '<option value="all">All classes</option>' +
+      state.classes.map(function(c){ return '<option value="'+c.id+'"'+(filterId===c.id?' selected':'')+'>'+esc(c.name)+'</option>'; }).join('') +
+      '</select></div>';
+
+    var entries = state.history.filter(function(h){ return filterId==='all' || h.classId===filterId; });
+
+    if(entries.length === 0){
+      html += '<div class="empty-state"><p>No picks recorded yet.</p></div>';
+    } else {
+      var groups = {};
+      entries.forEach(function(h){
+        if(!groups[h.date]) groups[h.date] = [];
+        groups[h.date].push(h);
+      });
+      var dates = Object.keys(groups).sort().reverse();
+      dates.forEach(function(date){
+        html += '<div class="hist-day"><div class="date-label">'+fmtDate(date)+'</div>';
+        groups[date].forEach(function(h){
+          html += '<div class="hist-entry" data-id="'+h.id+'">' +
+            '<div class="row1"><div><div class="cls">'+esc(h.className)+'</div>' +
+            '<div class="names">'+h.students.map(function(s){ return esc(s.name); }).join(' &amp; ')+'</div></div>' +
+            '<button class="del" data-id="'+h.id+'">✕</button></div>' +
+            '<input class="note-field" data-id="'+h.id+'" placeholder="Add a note (e.g. absent, swapped)…" value="'+esc(h.notes||'')+'">' +
+            '</div>';
+        });
+        html += '</div>';
+      });
+    }
+
+    el.innerHTML = html;
+
+    var sel = document.getElementById('histFilter');
+    sel.onchange = function(){ el._filter = sel.value; renderHistory(); };
+
+    Array.prototype.forEach.call(el.querySelectorAll('.del'), function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-id');
+        state.history = state.history.filter(function(h){ return h.id !== id; });
+        save();
+        renderHistory();
+      };
+    });
+    Array.prototype.forEach.call(el.querySelectorAll('.note-field'), function(inp){
+      inp.onblur = function(){
+        var id = inp.getAttribute('data-id');
+        var h = state.history.find(function(x){ return x.id === id; });
+        if(h){ h.notes = inp.value; save(); }
+      };
+    });
+  }
+
+  /* ---------- RENDER: HELP VIEW ---------- */
+  function renderHelp(){
+    var el = document.getElementById('view-help');
+    el.innerHTML =
+      '<div class="help-card">' +
+        '<h3>What this app does</h3>' +
+        '<p>Pick two random "leaders of the day" from a class, fairly. Once a student is picked, ' +
+        'they won\'t come up again until everyone else in that class has had a turn — then the round resets automatically.</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>🎯 Picking leaders</h3>' +
+        '<ol>' +
+          '<li>Tap a class in the row of tabs at the top to select it.</li>' +
+          '<li>Tap the <strong>Draw Two Leaders</strong> circle. Two names appear on cards.</li>' +
+          '<li>If a student drawn is absent, tap <strong>↻ Out today? Swap</strong> under their card ' +
+          'to redraw just that one — the other pick stays put.</li>' +
+          '<li>Not happy with either pick? Tap <strong>Redraw</strong> to draw two fresh names.</li>' +
+          '<li>Tap <strong>Confirm Leaders</strong> to lock them in for today and save them to History.</li>' +
+        '</ol>' +
+        '<p>Once confirmed, that class shows today\'s leaders instead of the draw button. Tap ' +
+        '<strong>Draw again for today</strong> if you need to redo it (e.g. a mistake or a last-minute absence).</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>🗂️ Adding &amp; managing classes</h3>' +
+        '<p><strong>Add one class at a time:</strong> open the Classes tab, tap <strong>Add a class</strong>, ' +
+        'choose <strong>One class</strong>, then type a class name and paste or type student names — one per line.</p>' +
+        '<p><strong>Add many classes at once:</strong> choose <strong>Bulk import</strong> instead, and paste all your rosters ' +
+        'in this format — the first line of each block is the class name, the rest are students, with a blank line between classes:</p>' +
+        '<pre class="code-block">Room 12\nAva Smith\nBen Jones\nCara Lee\n\nRoom 14\nDan Patel\nEve Chen</pre>' +
+        '<p><strong>Editing a roster:</strong> tap <strong>Manage roster</strong> on any class to rename it, add a student, ' +
+        'or remove one. Dimmed names have already had a turn this round.</p>' +
+        '<p><strong>Reset round:</strong> tap this to manually make everyone in a class eligible again — handy at the start ' +
+        'of a new grading period. Past history isn\'t affected.</p>' +
+        '<p><strong>Delete:</strong> removes the class and its history for good — this can\'t be undone.</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>💬 Leadership quotes</h3>' +
+        '<p>A quote rotates at the bottom of the sidebar — one shows per day, picked automatically so it stays the same all day ' +
+        'and changes the next.</p>' +
+        '<p>Open the <strong>Classes</strong> tab and use <strong>Manage leadership quotes</strong> to add your own or remove ' +
+        'ones you don\'t want, along with the author.</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>📋 History</h3>' +
+        '<p>Every confirmed pick is saved with the date. Use the dropdown to filter by class, tap into the note field on ' +
+        'any entry to jot something down (e.g. "absent," "swapped with Jordan"), or tap the ✕ to delete an entry.</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>⚖️ How the fairness logic works</h3>' +
+        '<p>Each class tracks who\'s already gone this round. A draw only pulls from students who haven\'t had a turn yet. ' +
+        'When the round runs out mid-draw, the app automatically starts a fresh round and finishes the draw — without letting ' +
+        'the same student get picked twice in one draw.</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>📱 Installing on an iPhone or iPad</h3>' +
+        '<ol>' +
+          '<li>Open this app\'s web address in <strong>Safari</strong> (it must be Safari, not Chrome).</li>' +
+          '<li>Tap the <strong>Share</strong> button.</li>' +
+          '<li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>' +
+          '<li>It now opens full-screen with its own icon, and works even with no wifi or data.</li>' +
+        '</ol>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>💾 Backing up &amp; moving data between devices</h3>' +
+        '<p>Classes and history are stored only on the device you\'re using — an iPhone and a Chromebook each keep their ' +
+        'own separate copy, and picks made on one won\'t appear on the other automatically.</p>' +
+        '<p>To move everything from one device to another, open the <strong>Classes</strong> tab and use ' +
+        '<strong>Backup &amp; restore data</strong>:</p>' +
+        '<ol>' +
+          '<li>On the device with the current data, open <strong>Export</strong> and tap <strong>Download Backup File</strong> ' +
+          '(or <strong>Copy to Clipboard</strong>).</li>' +
+          '<li>Get that file (or text) onto the other device — e.g. email it, AirDrop it, or use a shared drive.</li>' +
+          '<li>On the other device, open <strong>Import</strong>, choose the file or paste the text, then tap ' +
+          '<strong>Import Data</strong>.</li>' +
+        '</ol>' +
+        '<p>Importing replaces all classes and history currently on that device, so it\'s also a good way to keep a ' +
+        'backup somewhere safe.</p>' +
+      '</div>' +
+
+      '<div class="help-card">' +
+        '<h3>🔒 Your data &amp; privacy</h3>' +
+        '<p>Everything — classes, rosters, and history — is stored only on this device, in the browser\'s local storage. ' +
+        'There\'s no account, no login, and nothing is sent anywhere on its own. If you clear Safari\'s website data for ' +
+        'this app or delete it from your home screen, that data goes with it — unless you\'ve exported a backup first.</p>' +
+      '</div>';
+  }
+
+  /* ---------- NAV ---------- */
+  function switchView(view){
+    currentView = view;
+    ['pick','classes','history','help'].forEach(function(v){
+      document.getElementById('view-'+v).classList.toggle('hidden', v!==view);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.sidebar-nav button'), function(b){
+      b.classList.toggle('active', b.getAttribute('data-view')===view);
+    });
+    if(view==='pick') renderPick();
+    if(view==='classes') renderClasses();
+    if(view==='history') renderHistory();
+    if(view==='help') renderHelp();
+  }
+
+  function renderAll(){
+    updateHeaderSub();
+    renderSidebarQuote();
+    if(currentView==='pick') renderPick();
+    if(currentView==='classes') renderClasses();
+    if(currentView==='history') renderHistory();
+    if(currentView==='help') renderHelp();
+  }
+
+  function init(){
+    state = load();
+    Array.prototype.forEach.call(document.querySelectorAll('.sidebar-nav button'), function(b){
+      b.addEventListener('click', function(){ switchView(b.getAttribute('data-view')); });
+    });
+    renderAll();
+
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('./sw.js').catch(function(err){ console.warn('SW registration failed', err); });
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
